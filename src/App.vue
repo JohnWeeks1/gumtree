@@ -1,32 +1,65 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <PageLoader v-if="show"/>
+    <Navbar v-if="!hideNavBar"/>
+    <transition name="fade" mode="out-in">
+      <router-view />
+    </transition>
   </div>
 </template>
 
+<script>
+// @ is an alias to /src
+import Navbar from "@/components/global/Navbar.vue";
+
+export default {
+  name: "App",
+  data() {
+    return {
+      show: false,
+      idsForCurrentChat: {},
+    };
+  },
+  created() {
+    // By default show NavBar
+    this.$store.dispatch("nav/storeHideNavBar", false)
+    this.getUserDetails()
+    this.$store.dispatch("category/fetchCategories");
+  },
+  computed: {
+    hideNavBar() {
+      return this.$store.getters["nav/getHideNavBar"];
+    },
+  },
+  methods: {
+    getUserDetails() {
+      this.$store.dispatch("user/fetchLoggedInUser")
+      .catch((err) => {
+        console.error(err);
+      });
+    }
+  },
+  components: {
+    Navbar,
+  },
+};
+</script>
+
 <style lang="scss">
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
+  background: $light-gray;
 }
 
-#nav {
-  padding: 30px;
+.fade-enter-active,
+.fade-leave-active {
+  transition-duration: 0.2s;
+  transition-property: opacity;
+  transition-timing-function: ease;
+}
 
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+.fade-enter,
+.fade-leave-active {
+  opacity: 0;
 }
 </style>
